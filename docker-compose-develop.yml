@@ -44,3 +44,48 @@ services:
       - ./clickhouse_data/node4:/etc/clickhouse-server
     depends_on:
       - zookeeper
+
+  zookeeper_kafka:
+    networks:
+      - kafka
+    image: confluentinc/cp-zookeeper:5.3.1
+    container_name: zookeeper_kafka
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SYNC_LIMIT: 2
+
+  kafka:
+    image: confluentinc/cp-kafka
+    networks:
+      - kafka
+    ports:
+      - "9094:9094"
+    depends_on:
+      - zookeeper_kafka
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+    links:
+      - zookeeper_kafka
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    networks:
+      - kafka
+    environment:
+      - ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_BROKERCONNECT=kafka:9092
+    ports:
+      - "8001:9000"
+    links:
+      - zookeeper_kafka
+      - kafka
+    depends_on:
+      - zookeeper_kafka
+      - kafka
