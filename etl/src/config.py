@@ -7,4 +7,5 @@ class Settings(BaseSettings):
     kafka_group_id = Field(env='KAFKA_GROUP_ID', default='group_id_0')
     clickhouse_host = Field(env='CLICKHOUSE_HOST', default='')
 
+
 settings = Settings()
