@@ -11,31 +11,20 @@ from kafka.consumer.fetcher import ConsumerRecord
 from . import logger
 
 
-class KafkaConsumer:
+class KafkaExtractor:
     def __init__(self,
                  bootstrap_servers: str,
                  topic_name: str,
                  group_id: str = None,
-                 enable_auto_commit: bool = False,
-                 max_poll_records: int = 500,
+                 batch_size: int = 500,
                  **kwargs):
         self._bootstrap_servers = bootstrap_servers
         self._topic_name = topic_name
-        self._enable_auto_commit = enable_auto_commit
         self._group_id = group_id
         self._meta: t.Dict[str, t.Any] = kwargs
         self._config: t.Dict[str, t.Any] = {}
         self._consumer: t.Optional[_KafkaConsumer] = None
-        self._max_poll_records = max_poll_records
-
-    @property
-    def topic_name(self):
-        return self._topic_name
-
-    @topic_name.setter
-    def topic_name(self, value):
-        logger.info(f'Change topic name to "{value}"')
-        self._topic_name = value
+        self._max_poll_records = batch_size
 
     @property
     def config(self):
@@ -43,7 +32,6 @@ class KafkaConsumer:
             self._config.update(
                 {
                     'bootstrap_servers': self._bootstrap_servers,
-                    'enable_auto_commit': self._enable_auto_commit,
                     'group_id': self._group_id,
                     'max_poll_records': self._max_poll_records,
                     **self._meta,
@@ -57,7 +45,6 @@ class KafkaConsumer:
             return self._consumer
 
         consumer: _KafkaConsumer = _KafkaConsumer(
-            # api_version=(2,),
             value_deserializer=lambda x: json.loads(x.decode('utf-8')),
             **self.config)
         logger.info(f'Kafka consumer is started with options: {self.config}')
@@ -72,11 +59,11 @@ class KafkaConsumer:
         :type raw: признак того, чтобы возвращать ConsumerRecord (raw) или только значения (value) сообщений.
         По умолчанию False.
         """
-        logger.info(f'Start listing messages from topic "{self.topic_name}"')
+        logger.info(f'Start listing messages from topic "{self._topic_name}"')
         while True:
             messages_dict = self.consumer.poll(timeout_ms)
             if not messages_dict:
-                logger.info(f'There are no new messages in Kafka topic "{self.topic_name}"')
+                logger.info(f'There are no new messages in Kafka topic "{self._topic_name}"')
                 break
             for consumer_record_list in messages_dict.values():
                 for consumer_record in consumer_record_list:
@@ -84,18 +71,14 @@ class KafkaConsumer:
                                 f'and partition="{consumer_record.partition}"')
                     yield consumer_record if raw else consumer_record.value
 
-    def subscribe(self, offset: int = None, partition: int = 0):
+    def subscribe(self):
         """
         Подписка на топик
         :param offset: номер оффсета, с которого начинать читать. Необязательный параметр
         :param partition: номер партиции, с которой начинать читать. По умолчанию 0
         """
-        logger.info(f'Describe to topic {self.topic_name}')
-        if offset:
-            logger.info(f'Set offset={offset} in partition={partition}')
-            self._specify_offset(offset, partition)
-            return
-        self.consumer.subscribe([self.topic_name])
+        logger.info(f'Describe to topic {self._topic_name}')
+        self.consumer.subscribe([self._topic_name])
 
     def commit(self, message: ConsumerRecord):
         """
@@ -107,14 +90,6 @@ class KafkaConsumer:
         meta = self.consumer.partitions_for_topic(message.topic)
         options = {tp: OffsetAndMetadata(message.offset + 1, meta)}
         self.consumer.commit(options)
-
-    def _specify_offset(self, offset: int, partition: int):
-        """
-        Метод определяет оффсет, с которым необходимо работать, по его номеру и партиции
-        """
-        tp = TopicPartition(topic=self.topic_name, partition=partition)
-        self.consumer.assign([tp])
-        self.consumer.seek(tp, offset)
 
     def close(self):
         """
