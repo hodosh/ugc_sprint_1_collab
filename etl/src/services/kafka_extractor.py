@@ -52,12 +52,10 @@ class KafkaExtractor:
         self._consumer = consumer
         return self._consumer
 
-    def list_messages(self, timeout_ms: int = 1000, raw: bool = False) -> t.Generator:
+    def list_messages(self, timeout_ms: int = 1000) -> t.Generator:
         """
         Метод вычитывает сообщения из топика.
         :param timeout_ms: Таймаут ожидания новых сообщений в Kafka при выполнении запроса poll.
-        :type raw: признак того, чтобы возвращать ConsumerRecord (raw) или только значения (value) сообщений.
-        По умолчанию False.
         """
         logger.info(f'Start listing messages from topic "{self._topic_name}"')
         while True:
@@ -69,13 +67,12 @@ class KafkaExtractor:
                 for consumer_record in consumer_record_list:
                     logger.info(f'Got message from offset="{consumer_record.offset}" '
                                 f'and partition="{consumer_record.partition}"')
-                    yield consumer_record if raw else consumer_record.value
+                    yield consumer_record.value
+                    self.commit(consumer_record)
 
     def subscribe(self):
         """
         Подписка на топик
-        :param offset: номер оффсета, с которого начинать читать. Необязательный параметр
-        :param partition: номер партиции, с которой начинать читать. По умолчанию 0
         """
         logger.info(f'Describe to topic {self._topic_name}')
         self.consumer.subscribe([self._topic_name])
