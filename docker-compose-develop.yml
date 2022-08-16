@@ -46,12 +46,8 @@ services:
       - zookeeper
 
   zookeeper_kafka:
-    networks:
-      - kafka
     image: confluentinc/cp-zookeeper:5.3.1
     container_name: zookeeper_kafka
-    ports:
-      - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -59,10 +55,8 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka
-    networks:
-      - kafka
     ports:
-      - "9094:9094"
+      - "9092:9092"
     depends_on:
       - zookeeper_kafka
     environment:
@@ -73,16 +67,16 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
     links:
       - zookeeper_kafka
+    volumes:
+      - ./kafka_data:/var/lib/kafka/data
 
   kafdrop:
     image: obsidiandynamics/kafdrop
-    networks:
-      - kafka
     environment:
       - ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_BROKERCONNECT=kafka:9092
     ports:
-      - "8001:9000"
+      - "9000:9000"
     links:
       - zookeeper_kafka
       - kafka
