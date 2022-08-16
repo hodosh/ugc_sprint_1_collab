@@ -143,5 +143,6 @@ contracts/rendered
 
 #  database data
 clickhouse_data
+kafka_data
 
 tests/functional/results
