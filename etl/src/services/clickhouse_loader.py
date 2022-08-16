@@ -1,5 +1,7 @@
 from clickhouse_driver import Client
 
+import typing as t
+
 from src.utils import backoff
 
 
@@ -25,15 +27,15 @@ class ClickHouseLoader:
         return self._client
 
     @backoff()
-    def load(self, data: dict):
+    def load(self, data: t.Generator):
         """
         Метод загружает данные в таблицу
         :param data: словарь данных
         """
-        for batch_data in data:
+        for event_dict in data:
             self.client.execute(
                 f'INSERT INTO {self._database}.{self._table} VALUES',
-                batch_data,
+                event_dict,
             )
 
     @backoff()
@@ -42,3 +44,7 @@ class ClickHouseLoader:
         Создаем таблицу, если она отсутствует
         """
         self.client.execute(f'CREATE DATABASE IF NOT EXISTS {self._table} ON CLUSTER {self._cluster}')
+
+    def close(self):
+        self.client.disconnect()
+        self._client = None

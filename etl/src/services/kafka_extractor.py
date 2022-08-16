@@ -58,17 +58,16 @@ class KafkaExtractor:
         :param timeout_ms: Таймаут ожидания новых сообщений в Kafka при выполнении запроса poll.
         """
         logger.info(f'Start listing messages from topic "{self._topic_name}"')
-        while True:
-            messages_dict = self.consumer.poll(timeout_ms)
-            if not messages_dict:
-                logger.info(f'There are no new messages in Kafka topic "{self._topic_name}"')
-                break
-            for consumer_record_list in messages_dict.values():
-                for consumer_record in consumer_record_list:
-                    logger.info(f'Got message from offset="{consumer_record.offset}" '
-                                f'and partition="{consumer_record.partition}"')
-                    yield consumer_record.value
-                    self.commit(consumer_record)
+        messages_dict = self.consumer.poll(timeout_ms)
+        if not messages_dict:
+            logger.info(f'There are no new messages in Kafka topic "{self._topic_name}"')
+            return
+        for consumer_record_list in messages_dict.values():
+            for consumer_record in consumer_record_list:
+                logger.info(f'Got message from offset="{consumer_record.offset}" '
+                            f'and partition="{consumer_record.partition}"')
+                yield consumer_record.value
+                self.commit(consumer_record)
 
     def subscribe(self):
         """
