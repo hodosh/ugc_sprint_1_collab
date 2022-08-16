@@ -21,6 +21,7 @@ def run():
         # subscribe to topic
         kafka.subscribe()
         # init database
+        clickhouse.create_database()
         clickhouse.create_table()
         input_data_gen = kafka.list_messages()
         if input_data_gen:

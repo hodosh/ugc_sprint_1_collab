@@ -35,11 +35,18 @@ class ClickHouseLoader:
                 event_dict,
             )
 
+    def create_database(self):
+        """
+        Создаем БД, если она отсутствует
+        """
+        self.client.execute(f'CREATE DATABASE IF NOT EXISTS {self._database} ON CLUSTER {self._cluster}')
+
     def create_table(self):
         """
         Создаем таблицу, если она отсутствует
         """
-        self.client.execute(f'CREATE DATABASE IF NOT EXISTS {self._table} ON CLUSTER {self._cluster}')
+        self.client.execute(f'CREATE TABLE IF NOT EXISTS {self._database}.{self._table} ON CLUSTER {self._cluster} '
+                            '(id Int64, x Int32) Engine=MergeTree() ORDER BY id')
 
     def close(self):
         self.client.disconnect()
