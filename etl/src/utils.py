@@ -1,7 +1,7 @@
 import time
 from functools import wraps
 
-from etl.src.services import logger
+from services import logger
 
 
 def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10):

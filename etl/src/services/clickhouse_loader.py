@@ -1,8 +1,6 @@
-from clickhouse_driver import Client
-
 import typing as t
 
-from src.utils import backoff
+from clickhouse_driver import Client
 
 
 class ClickHouseLoader:
@@ -26,7 +24,6 @@ class ClickHouseLoader:
 
         return self._client
 
-    @backoff()
     def load(self, data: t.Generator):
         """
         Метод загружает данные в таблицу
@@ -38,7 +35,6 @@ class ClickHouseLoader:
                 event_dict,
             )
 
-    @backoff()
     def create_table(self):
         """
         Создаем таблицу, если она отсутствует

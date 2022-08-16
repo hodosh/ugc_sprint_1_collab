@@ -8,7 +8,7 @@ from kafka import (
 )
 from kafka.consumer.fetcher import ConsumerRecord
 
-from . import logger
+from services import logger
 
 
 class KafkaExtractor:
