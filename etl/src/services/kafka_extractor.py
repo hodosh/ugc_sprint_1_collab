@@ -8,6 +8,7 @@ from kafka import (
 )
 from kafka.consumer.fetcher import ConsumerRecord
 
+from config import settings
 from services import logger
 
 
@@ -17,6 +18,7 @@ class KafkaExtractor:
                  topic_name: str,
                  group_id: str = None,
                  batch_size: int = 500,
+                 auto_offset_reset: str = 'earliest',
                  **kwargs):
         self._bootstrap_servers = bootstrap_servers
         self._topic_name = topic_name
@@ -25,6 +27,7 @@ class KafkaExtractor:
         self._config: t.Dict[str, t.Any] = {}
         self._consumer: t.Optional[_KafkaConsumer] = None
         self._max_poll_records = batch_size
+        self._auto_offset_reset = auto_offset_reset
 
     @property
     def config(self):
@@ -34,6 +37,7 @@ class KafkaExtractor:
                     'bootstrap_servers': self._bootstrap_servers,
                     'group_id': self._group_id,
                     'max_poll_records': self._max_poll_records,
+                    'auto_offset_reset': self._auto_offset_reset,
                     **self._meta,
                 },
             )
@@ -52,7 +56,7 @@ class KafkaExtractor:
         self._consumer = consumer
         return self._consumer
 
-    def list_messages(self, timeout_ms: int = 1000) -> t.Generator:
+    def list_messages(self, timeout_ms: int = settings.kafka_poll_timeout_ms) -> t.Generator:
         """
         Метод вычитывает сообщения из топика.
         :param timeout_ms: Таймаут ожидания новых сообщений в Kafka при выполнении запроса poll.
@@ -81,6 +85,8 @@ class KafkaExtractor:
         Метод для коммита сообщения
         :param message: сообщение типа ConsumerRecord
         """
+        if not self._group_id:
+            return
         logger.info(f'Commit message from offset={message.offset}')
         tp = TopicPartition(message.topic, message.partition)
         meta = self.consumer.partitions_for_topic(message.topic)

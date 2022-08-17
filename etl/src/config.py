@@ -2,9 +2,10 @@ from pydantic import BaseSettings, Field
 
 
 class Settings(BaseSettings):
-    kafka_brokers = Field(env='KAFKA_BROKERS', default='127.0.0.1:9094')
+    kafka_brokers = Field(env='KAFKA_BROKERS', default='127.0.0.1:29092')
     kafka_topics = Field(env='KAFKA_TOPICS', default='events_topic')
-    kafka_group_id = Field(env='KAFKA_GROUP_ID', default='group_id_0')
+    kafka_group_id: str = Field(env='KAFKA_GROUP_ID', default='my-group')
+    kafka_poll_timeout_ms: str = Field(env='KAFKA_POLL_TIMEOUT_MS', default=3000)
     clickhouse_host = Field(env='CLICKHOUSE_HOST', default='127.0.0.1')
     clickhouse_database = Field(env='CLICKHOUSE_DATABASE', default='events')
     clickhouse_table = Field(env='CLICKHOUSE_TABLE', default='events')
