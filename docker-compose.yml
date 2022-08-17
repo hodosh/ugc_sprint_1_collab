@@ -1,10 +1,10 @@
 version: '3.5'
 
 services:
-  zookeeper:
+  zookeeper-ch:
     image: zookeeper:3.5
-    container_name: zookeeper
-    hostname: zookeeper
+    container_name: zookeeper-ch
+    hostname: zookeeper-ch
 
   clickhouse-node1:
     image: yandex/clickhouse-server:20.4
@@ -16,7 +16,7 @@ services:
     volumes:
       - ./clickhouse_data/node1:/etc/clickhouse-server
     depends_on:
-      - zookeeper
+      - zookeeper-ch
 
   clickhouse-node2:
     image: yandex/clickhouse-server:20.4
@@ -25,7 +25,7 @@ services:
     volumes:
       - ./clickhouse_data/node2:/etc/clickhouse-server
     depends_on:
-      - zookeeper
+      - zookeeper-ch
 
   clickhouse-node3:
     image: yandex/clickhouse-server:20.4
@@ -34,7 +34,7 @@ services:
     volumes:
       - ./clickhouse_data/node3:/etc/clickhouse-server
     depends_on:
-      - zookeeper
+      - zookeeper-ch
 
   clickhouse-node4:
     image: yandex/clickhouse-server:20.4
@@ -43,43 +43,42 @@ services:
     volumes:
       - ./clickhouse_data/node4:/etc/clickhouse-server
     depends_on:
-      - zookeeper
+      - zookeeper-ch
 
-  zookeeper_kafka:
-    image: confluentinc/cp-zookeeper:5.3.1
-    container_name: zookeeper_kafka
+  zookeeper-1:
+    image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-      ZOOKEEPER_SYNC_LIMIT: 2
 
-  kafka:
-    image: confluentinc/cp-kafka
-    ports:
-      - "9094:9094"
-    depends_on:
-      - zookeeper_kafka
+  zookeeper-2:
+    image: confluentinc/cp-zookeeper:latest
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper_kafka:2181
-      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://localhost:9094
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-    links:
-      - zookeeper_kafka
-    volumes:
-      - ./kafka_data:/var/lib/kafka/data
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
 
-  kafdrop:
-    image: obsidiandynamics/kafdrop
-    environment:
-      - ZOOKEEPER_CONNECT=zookeeper_kafka:2181
-      - KAFKA_BROKERCONNECT=kafka:9092
-    ports:
-      - "8001:9000"
-    links:
-      - zookeeper_kafka
-      - kafka
+  kafka-1:
+    image: confluentinc/cp-kafka:latest
     depends_on:
-      - zookeeper_kafka
-      - kafka
+      - zookeeper-1
+      - zookeeper-2
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181,zookeeper-2:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  kafka-2:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181,zookeeper-2:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092,PLAINTEXT_HOST://localhost:39092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
