@@ -9,19 +9,20 @@ from kafka import (
 from kafka.consumer.fetcher import ConsumerRecord
 
 from config import settings
+from models import Message
 from services import logger
 
 
 class KafkaExtractor:
     def __init__(self,
                  bootstrap_servers: str,
-                 topic_name: str,
+                 topic_list: list,
                  group_id: str = None,
                  batch_size: int = 500,
                  auto_offset_reset: str = 'earliest',
                  **kwargs):
         self._bootstrap_servers = bootstrap_servers
-        self._topic_name = topic_name
+        self._topic_list = topic_list
         self._group_id = group_id
         self._meta: t.Dict[str, t.Any] = kwargs
         self._config: t.Dict[str, t.Any] = {}
@@ -61,24 +62,24 @@ class KafkaExtractor:
         Метод вычитывает сообщения из топика.
         :param timeout_ms: Таймаут ожидания новых сообщений в Kafka при выполнении запроса poll.
         """
-        logger.info(f'Start listing messages from topic "{self._topic_name}"')
+        logger.info(f'Start listing messages from topic "{self._topic_list}"')
         messages_dict = self.consumer.poll(timeout_ms)
         if not messages_dict:
-            logger.info(f'There are no new messages in Kafka topic "{self._topic_name}"')
+            logger.info(f'There are no new messages in Kafka topic "{self._topic_list}"')
             return
         for consumer_record_list in messages_dict.values():
             for consumer_record in consumer_record_list:
                 logger.info(f'Got message from offset="{consumer_record.offset}" '
                             f'and partition="{consumer_record.partition}"')
-                yield consumer_record.value
+                yield Message(topic=consumer_record.topic, body=consumer_record.value)
                 self.commit(consumer_record)
 
     def subscribe(self):
         """
         Подписка на топик
         """
-        logger.info(f'Describe to topic {self._topic_name}')
-        self.consumer.subscribe([self._topic_name])
+        logger.info(f'Describe to topic {self._topic_list}')
+        self.consumer.subscribe(self._topic_list)
 
     def commit(self, message: ConsumerRecord):
         """
