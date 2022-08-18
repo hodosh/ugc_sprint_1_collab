@@ -11,11 +11,11 @@ from utils import backoff
 def run():
     with closing(ClickHouseLoader(host=settings.clickhouse_host,
                                   database=settings.clickhouse_database,
-                                  table=settings.clickhouse_table,
+                                  table=settings.clickhouse_film_view_table,
                                   cluster=settings.clickhouse_cluster,
                                   batch_size=settings.etl_batch_size)) as clickhouse, closing(
         KafkaExtractor(bootstrap_servers=settings.kafka_brokers,
-                       topic_name=settings.kafka_topics,
+                       topic_list=settings.kafka_topics,
                        group_id=settings.kafka_group_id,
                        batch_size=settings.etl_batch_size)) as kafka:
         # subscribe to topic
@@ -25,9 +25,7 @@ def run():
         clickhouse.create_table()
         input_data_gen = kafka.list_messages()
         if input_data_gen:
-            # todo transform input data
-            transformed_data = input_data_gen
-            clickhouse.load(data=transformed_data)
+            clickhouse.load(data=input_data_gen)
 
 
 if __name__ == '__main__':

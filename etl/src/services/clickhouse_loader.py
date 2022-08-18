@@ -2,6 +2,8 @@ import typing as t
 
 from clickhouse_driver import Client
 
+from config import settings
+
 
 class ClickHouseLoader:
     def __init__(self,
@@ -16,6 +18,12 @@ class ClickHouseLoader:
         self._batch_size = batch_size
         self._cluster = cluster
         self._client = None
+
+    @classmethod
+    def get_table_by_topic_name(cls, topic_name: str) -> str:
+        return {
+            settings.kafka_film_view_topic_name: settings.clickhouse_film_view_table,
+        }[topic_name]
 
     @property
     def client(self):
