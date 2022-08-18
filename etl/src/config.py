@@ -3,7 +3,7 @@ from pydantic import BaseSettings, Field
 
 class Settings(BaseSettings):
     kafka_film_view_topic_name: str = Field(env='KAFKA_FILM_VIEW_TOPIC', default='events_topic')
-    kafka_brokers: str = Field(env='KAFKA_BROKERS', default='127.0.0.1:29092')
+    kafka_brokers: list = Field(env='KAFKA_BROKERS', default=['127.0.0.1:29092', '127.0.0.1:39092'])
     kafka_topics: list = Field(env='KAFKA_TOPICS', default=['events_topic'])
     kafka_group_id: str = Field(env='KAFKA_GROUP_ID', default='my-group')
     kafka_poll_timeout_ms: int = Field(env='KAFKA_POLL_TIMEOUT_MS', default=3000)
