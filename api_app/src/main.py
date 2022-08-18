@@ -24,8 +24,7 @@ async def startup():
 
 @app.on_event('shutdown')
 async def shutdown():
-    await redis.redis.close()
-    # await elastic.es.close()
+    await kafka.kafka_producer.stop()
 
 
 # Подключаем роутер к серверу, указав префикс /v1/films
