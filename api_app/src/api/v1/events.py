@@ -18,7 +18,6 @@ router = APIRouter()
 )
 async def message(topic: str, key: str, value: str,
                   event_service: EventService = Depends(get_event_service)) -> StatusMessage:
-    print(f"{topic}, {key}, {value}")
     await event_service.send_message(topic, key, value)
 
     # raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film not found')

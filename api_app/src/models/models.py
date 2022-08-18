@@ -22,4 +22,4 @@ class FilmViewEvent(ORJSONModel):
     user_id: str
     movie_id: str
     event_time: datetime
-    view_run_time: int
+    view_second: int

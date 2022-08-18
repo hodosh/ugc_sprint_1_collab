@@ -23,7 +23,7 @@ app = FastAPI(
 async def startup():
     redis.redis = await aioredis.create_redis_pool((settings.REDIS_HOST, settings.REDIS_PORT), minsize=10, maxsize=20)
     kafka.kafka_producer = aiokafka.AIOKafkaProducer(bootstrap_servers=f'{settings.KAFKA_HOST}:{settings.KAFKA_PORT}')
-    # elastic.es = AsyncElasticsearch(hosts=[f'{settings.ES_HOST}:{settings.ES_PORT}'])
+    await kafka.kafka_producer.start()
 
 
 @app.on_event('shutdown')
@@ -35,7 +35,6 @@ async def shutdown():
 # Подключаем роутер к серверу, указав префикс /v1/films
 # Теги указываем для удобства навигации по документации
 app.include_router(events.router, prefix='/api/v1/event', tags=['Event'])
-
 
 if __name__ == '__main__':
     uvicorn.run(
