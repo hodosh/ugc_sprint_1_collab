@@ -1,5 +1,7 @@
 from clickhouse_driver import Client
 
+from config import settings
+
 
 class ClickHouseLoader:
     def __init__(self,
@@ -27,7 +29,7 @@ class ClickHouseLoader:
         """
         for table_name, data_list in data.items():
             # create table if not exists
-            self.create_table(table_name)
+            self.create_tables()
             # load data
             self.client.execute(
                 f'INSERT INTO {self._database}.{table_name} VALUES',
@@ -40,12 +42,14 @@ class ClickHouseLoader:
         """
         self.client.execute(f'CREATE DATABASE IF NOT EXISTS {self._database} ON CLUSTER {self._cluster}')
 
-    def create_table(self, table_name: str):
+    def create_tables(self):
         """
-        Создаем таблицу, если она отсутствует
+        Создаем таблицы, если она отсутствует, новые таблицы добавляем сюда же
         """
-        self.client.execute(f'CREATE TABLE IF NOT EXISTS {self._database}.{table_name} ON CLUSTER {self._cluster} '
-                            '(id Int64, x Int32) Engine=MergeTree() ORDER BY id')
+        self.client.execute(f'CREATE TABLE IF NOT EXISTS {self._database}.{settings.clickhouse_film_view_table} '
+                            f'ON CLUSTER {self._cluster} '
+                            '(user_id String, movie_id String, event_time DateTime, view_second Int32) '
+                            'Engine=MergeTree() ORDER BY user_id')
 
     def close(self):
         self.client.disconnect()
