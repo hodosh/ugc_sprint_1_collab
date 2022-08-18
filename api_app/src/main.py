@@ -27,7 +27,7 @@ async def shutdown():
     await kafka.kafka_producer.stop()
 
 
-# Подключаем роутер к серверу, указав префикс /v1/films
+# Подключаем роутер к серверу, указав префикс /v1/events
 # Теги указываем для удобства навигации по документации
 app.include_router(events.router, prefix='/api/v1/event', tags=['Event'])
 
