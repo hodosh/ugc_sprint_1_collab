@@ -9,7 +9,7 @@ from kafka import (
 from kafka.consumer.fetcher import ConsumerRecord
 
 from config import settings
-from models import Message
+from models import Message, FilmViewEvent
 from services import logger
 
 
@@ -71,7 +71,7 @@ class KafkaExtractor:
             for consumer_record in consumer_record_list:
                 logger.info(f'Got message from offset="{consumer_record.offset}" '
                             f'and partition="{consumer_record.partition}"')
-                yield Message(topic=consumer_record.topic, body=consumer_record.value)
+                yield Message(topic=consumer_record.topic, body=FilmViewEvent(**consumer_record.value))
                 self.commit(consumer_record)
 
     def subscribe(self):
