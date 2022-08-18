@@ -1,6 +1,4 @@
-import aioredis
 import uvicorn
-from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
@@ -8,7 +6,6 @@ import aiokafka
 
 from api.v1 import events
 from core.config import settings
-from db import redis
 from db import kafka
 
 app = FastAPI(
@@ -21,7 +18,6 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    redis.redis = await aioredis.create_redis_pool((settings.REDIS_HOST, settings.REDIS_PORT), minsize=10, maxsize=20)
     kafka.kafka_producer = aiokafka.AIOKafkaProducer(bootstrap_servers=f'{settings.KAFKA_HOST}:{settings.KAFKA_PORT}')
     await kafka.kafka_producer.start()
 

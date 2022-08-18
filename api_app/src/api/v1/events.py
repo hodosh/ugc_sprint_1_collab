@@ -20,6 +20,4 @@ async def message(topic: str, key: str, value: str,
                   event_service: EventService = Depends(get_event_service)) -> StatusMessage:
     await event_service.send_message(topic, key, value)
 
-    # raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film not found')
-    message = StatusMessage(head="ok", body="all ok")
-    return message
+    return StatusMessage(head="ok", body="all ok")
