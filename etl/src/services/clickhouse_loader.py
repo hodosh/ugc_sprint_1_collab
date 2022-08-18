@@ -27,9 +27,9 @@ class ClickHouseLoader:
         Метод загружает данные в таблицу
         :param data: словарь данных
         """
+        # create table if not exists
+        self.create_tables()
         for table_name, data_list in data.items():
-            # create table if not exists
-            self.create_tables()
             # load data
             self.client.execute(
                 f'INSERT INTO {self._database}.{table_name} VALUES',
