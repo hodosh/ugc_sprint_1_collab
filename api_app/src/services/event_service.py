@@ -1,12 +1,10 @@
 from typing import Optional
 
-from aioredis import Redis
 from aiokafka.producer import AIOKafkaProducer
 
 
 class EventService:
-    def __init__(self, redis: Redis, kafka_producer: AIOKafkaProducer):
-        self.redis = redis
+    def __init__(self,kafka_producer: AIOKafkaProducer):
         self.kafka_producer = kafka_producer
 
     async def send_message(self, topic: str, key: str, value: str):
