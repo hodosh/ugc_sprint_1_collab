@@ -2,7 +2,7 @@
 
 [Исследование по хранилищам](research/readme_research.txt)
 
-[EventAPI](api_app/requirements.txt)
+[EventAPI](api_app/readme.md)
 
 [ELT Kafka>ClickHouse ](etl/src/README.md)
 
