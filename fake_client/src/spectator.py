@@ -1,18 +1,13 @@
-from typing import Optional
-import asyncio
-
-import uuid
-from random import randrange
 from datetime import datetime
+from random import randrange
+from typing import Optional
 
-import config
 import fake_data
 from models import FilmViewEvent
 
 
 class Spectator:
     def __init__(self, user_id, movie_id, length):
-
         self.length = length
         self.movie_id = movie_id
         self.user_id = user_id
