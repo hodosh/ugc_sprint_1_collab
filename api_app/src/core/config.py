@@ -20,5 +20,8 @@ class Settings(BaseSettings):
     KAFKA_HOST = 'localhost'
     KAFKA_PORT = 9092
 
+    KAFKA_BROKERS: list = Field(env='KAFKA_BROKERS', default=['127.0.0.1:29092', '127.0.0.1:39092'])
+    KAFKA_FILM_VIEW_TOPIC: str = Field(env='KAFKA_FILM_VIEW_TOPIC', default='events_topic')
+
 
 settings = Settings()

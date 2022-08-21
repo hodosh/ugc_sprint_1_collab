@@ -1,9 +1,12 @@
+#FROM python:3.10-slim
 FROM python:3.9.13-slim
 
 WORKDIR /home/app
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+
+
 
 RUN pip install --upgrade pip
 
@@ -18,3 +21,4 @@ RUN pip install --user -r requirements.txt
 ENV PATH="/home/app/.local/bin:${PATH}"
 
 COPY --chown=app:app ./src .
+#CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

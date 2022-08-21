@@ -1,6 +1,22 @@
 version: '3.9'
 
 services:
+  api:
+    build: ./api_app
+    container_name: api
+    restart: always
+    entrypoint: [ "gunicorn", "main:app", "--workers", "4", "--worker-class",
+                  "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--reload" ]
+    env_file:
+      - .env
+    expose:
+      - 8000
+    depends_on:
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+
   etl:
     build: etl
     restart: always
@@ -72,6 +88,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
 
   zookeeper-2:
     image: confluentinc/cp-zookeeper:latest
@@ -79,6 +97,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 32181:2181
 
   kafka-1:
     image: confluentinc/cp-kafka:latest
@@ -95,6 +115,14 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: nc -z localhost 29092 || exit -1
+      start_period: 15s
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+
 
   kafka-2:
     image: confluentinc/cp-kafka:latest
@@ -111,6 +139,12 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: nc -z localhost 39092 || exit -1
+      start_period: 15s
+      interval: 5s
+      timeout: 10s
+      retries: 10
 
   kafdrop:
     image: obsidiandynamics/kafdrop
@@ -122,12 +156,7 @@ services:
       - "8001:9000"
     links:
       - zookeeper-1
-      - kafka-1
-      - zookeeper-2
-      - kafka-2
-    depends_on:
-      - zookeeper-1
-      - kafka-1
-      - zookeeper-2
-      - kafka-2
+
+
+
 
