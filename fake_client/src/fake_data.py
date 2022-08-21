@@ -1,8 +1,6 @@
 import uuid
 from random import randrange
 
-import config
-
 USER_COUNT = 200
 MOVIE_COUNT = 300
 MOVIE_MAX_LEN = 180
