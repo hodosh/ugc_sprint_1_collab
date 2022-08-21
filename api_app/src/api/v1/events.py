@@ -1,12 +1,8 @@
-from http import HTTPStatus
-from typing import Optional
-
-from fastapi import APIRouter, Depends, HTTPException
-
 from api.v1.view_models import StatusMessage
+from fastapi import APIRouter, Depends
+from models.models import EventMessage
 from services.event_service import EventService
 from services.service_locator import get_event_service
-from models.models import EventMessage
 
 router = APIRouter()
 
