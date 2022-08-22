@@ -24,8 +24,8 @@ class KafkaExtractor:
         self._bootstrap_servers = bootstrap_servers
         self._topic_list = topic_list
         self._group_id = group_id
-        self._meta: t.Dict[str, t.Any] = kwargs
-        self._config: t.Dict[str, t.Any] = {}
+        self._meta: dict[str, t.Any] = kwargs
+        self._config: dict[str, t.Any] = {}
         self._consumer: t.Optional[_KafkaConsumer] = None
         self._max_poll_records = batch_size
         self._auto_offset_reset = auto_offset_reset
