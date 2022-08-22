@@ -1,6 +1,6 @@
 # Проектная работа 8 спринта
 
-[Исследование по хранилищам](research/readme_research.txt)
+[Исследование по хранилищам](research/readme.md)
 
 [Архитектура сервисов до/после](architecture/readme.md)
 
