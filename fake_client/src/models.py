@@ -16,7 +16,6 @@ class ORJSONModel(BaseModel):
 
 
 class FilmViewEvent(ORJSONModel):
-    id: str
     user_id: str
     movie_id: str
     event_time: datetime

@@ -133,7 +133,6 @@ dmypy.json
 report/
 contracts/rendered
 .DS_Store
-etl/app/etl/_state/etl_state.json
 /.idea/Async_API_sprint_1.iml
 /.idea/misc.xml
 /.idea/modules.xml
@@ -143,7 +142,7 @@ etl/app/etl/_state/etl_state.json
 
 
 #  database data
-postgres/data/
-elastic_index/data
+clickhouse_data
+kafka_data
 
 tests/functional/results
