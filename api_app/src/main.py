@@ -1,12 +1,13 @@
+import aiokafka
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-
-import aiokafka
+from fastapi.logger import logger
 
 from api.v1 import events
 from core.config import settings
 from db import kafka
+from utils import backoff
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -17,9 +18,11 @@ app = FastAPI(
 
 
 @app.on_event('startup')
+@backoff(border_sleep_time=20)
 async def startup():
     kafka.kafka_producer = aiokafka.AIOKafkaProducer(bootstrap_servers=settings.KAFKA_BROKERS)
     await kafka.kafka_producer.start()
+    logger.info('kafka is ok')
 
 
 @app.on_event('shutdown')

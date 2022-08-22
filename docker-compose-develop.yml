@@ -12,10 +12,14 @@ services:
     env_file:
       - api_app/src/core/.env.dev
     depends_on:
-      kafka-1:
-        condition: service_healthy
-      kafka-2:
-        condition: service_healthy
+      - kafka-1
+      - kafka-2
+    healthcheck:
+      test: nc -z kafka-1 9092 || nc -z kafka-2 9092 || exit -1
+      start_period: 15s
+      interval: 5s
+      timeout: 10s
+      retries: 10
 
   etl:
     build: etl
@@ -25,18 +29,18 @@ services:
       - etl/.env
     command: python src/main.py
     depends_on:
-      clickhouse-node1:
-        condition: service_healthy
-      clickhouse-node2:
-        condition: service_healthy
-      clickhouse-node3:
-        condition: service_healthy
-      clickhouse-node4:
-        condition: service_healthy
-      kafka-1:
-        condition: service_healthy
-      kafka-2:
-        condition: service_healthy
+      - clickhouse-node1
+      - clickhouse-node2
+      - clickhouse-node3
+      - clickhouse-node4
+      - kafka-1
+      - kafka-2
+    healthcheck:
+      test: nc -z kafka-1 9092 || nc -z kafka-2 9092 || exit -1
+      start_period: 15s
+      interval: 5s
+      timeout: 10s
+      retries: 10
 
   zookeeper:
     image: zookeeper:3.5
@@ -158,4 +162,3 @@ services:
       - kafka-1
       - zookeeper-2
       - kafka-2
-
