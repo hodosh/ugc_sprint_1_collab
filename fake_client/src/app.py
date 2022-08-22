@@ -23,7 +23,7 @@ async def one_iteration(session):
             fake_user.start_watch_movie(fake_data.MOVIES[new_movie_index], fake_data.MOVIE_LENGTH[new_movie_index])
 
         key = fake_user.key
-        message = EventMessage(topic=config.API_TOPIC, key=key, value=film_view_event.json())
+        message = EventMessage(key=key, value=film_view_event.json())
 
         await session.post(f'http://{config.API_HOST}:{config.API_PORT}/api/v1/event/', json=message.dict())
 

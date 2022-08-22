@@ -19,3 +19,7 @@ class ClickhouseStorage(HiLoadStorage):
                 f"VALUES {batch}"
         self.client.execute(query)
 
+    def select(self, data=None):
+        query = f"SELECT  * FROM movies_statistics.view_stat " \
+                f"WHERE movie_id = '{data.movie_id}'"
+        self.client.execute(query)

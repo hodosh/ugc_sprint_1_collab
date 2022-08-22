@@ -23,6 +23,5 @@ class FilmViewEvent(ORJSONModel):
 
 
 class EventMessage(ORJSONModel):
-    topic: str
     key: str
     value: str

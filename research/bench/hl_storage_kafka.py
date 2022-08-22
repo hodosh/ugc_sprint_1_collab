@@ -17,3 +17,6 @@ class KafkaStorage(HiLoadStorage):
 
     def insert_batch(self, data=None, batch_size: int = 10):
         pass
+
+    def select(self, data=None):
+        pass

@@ -13,3 +13,7 @@ class HiLoadStorage:
     @abc.abstractmethod
     def insert_batch(self, data=None, batch_size: int = 10):
         pass
+
+    @abc.abstractmethod
+    def select(self, data = None):
+        pass
