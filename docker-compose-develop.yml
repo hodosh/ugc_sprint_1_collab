@@ -14,6 +14,12 @@ services:
     depends_on:
       - kafka-1
       - kafka-2
+    healthcheck:
+      test: nc -z kafka-1 9092 || nc -z kafka-2 9092 || exit -1
+      start_period: 15s
+      interval: 5s
+      timeout: 10s
+      retries: 10
 
   etl:
     build: etl
@@ -29,6 +35,12 @@ services:
       - clickhouse-node4
       - kafka-1
       - kafka-2
+    healthcheck:
+      test: nc -z kafka-1 9092 || nc -z kafka-2 9092 || exit -1
+      start_period: 15s
+      interval: 5s
+      timeout: 10s
+      retries: 10
 
   zookeeper:
     image: zookeeper:3.5
@@ -138,4 +150,3 @@ services:
       - kafka-1
       - zookeeper-2
       - kafka-2
-
